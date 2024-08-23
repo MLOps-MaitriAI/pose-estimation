@@ -1,0 +1,15 @@
+artifact_uri: mlflow-artifacts:/0/3034524e335c4447972d2bd833bf6144/artifacts
+end_time: 1724332932426
+entry_point_name: ''
+experiment_id: '0'
+lifecycle_stage: active
+run_id: 3034524e335c4447972d2bd833bf6144
+run_name: adventurous-flea-556
+run_uuid: 3034524e335c4447972d2bd833bf6144
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1724332932411
+status: 3
+tags: []
+user_id: ubuntu24

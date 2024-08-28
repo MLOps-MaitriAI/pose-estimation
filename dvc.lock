@@ -1,0 +1,9 @@
+schema: '2.0'
+stages:
+  train:
+    cmd: jupyter nbconvert --to notebook --inplace --execute ../../../../Downloads/Pose-Estimation-main/feature_extraction.ipynb
+    deps:
+    - path: ../../../../Downloads/Pose-Estimation-main/feature_extraction.ipynb
+      hash: md5
+      md5: 3af2f574f6a37093631c6de506e10714
+      size: 1346635

@@ -2,3 +2,6 @@ venv/
 DATASET/
 .DS_Store
 DATASET.zip
+/data
+/models
+/sample images

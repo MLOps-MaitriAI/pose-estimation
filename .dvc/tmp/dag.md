@@ -1,3 +1,2 @@
-```mermaid
-flowchart TD
-```
+Error: Command failed with exit code 251: /home/ubuntu24/anaconda3/envs/myenv/bin/python -m dvc dag --md
+ERROR: configuration error - config file error: extra keys not allowed @ data['remote']['dags_remote']['auth']

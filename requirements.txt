@@ -1,9 +1,12 @@
 numpy
-matplotlib
-opencv-python
-tqdm
-pandas 
+pandas
 scikit-learn
-joblib
-mediapipe
+seaborn
+matplotlib
 streamlit
+joblib
+dvc
+dagshub
+mlflow
+opencv-python-headless  # Use headless version to avoid unnecessary GUI dependencies
+mediapipe

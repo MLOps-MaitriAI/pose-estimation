@@ -1,5 +1,6 @@
 [core]
     no_scm = True
-    remote = dags_remote
-['remote "dags_remote"']
-    url = https://dagshub.com/MLOps-MaitriAI/pose-estimation.mlflow.dvc
+    remote = myremote
+
+[remote "myremote"]
+    url = https://dagshub.com/MLOps-MaitriAI/pose-estimation.dvc

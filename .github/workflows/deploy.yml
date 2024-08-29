@@ -8,7 +8,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -23,10 +23,21 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           
-      - name: Move the best model to the deployment folder
+      - name: Run Training Script
         run: |
-          mkdir -p models/best_model
-          cp models/best_model.sav models/best_model/best_model.sav
+          python tracking.py
+          
+      - name: Ensure the Best Model Directory Exists
+        run: mkdir -p models/best_model
+
+      - name: Copy the Best Model
+        run: |
+          if [ -f models/best_model.sav ]; then
+            cp models/best_model.sav models/best_model/best_model.sav
+          else
+            echo "Best model not found!"
+            exit 1
+          fi
 
       - name: Build Docker image
         run: |

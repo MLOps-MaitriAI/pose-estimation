@@ -1,6 +1,12 @@
 # Use a base image with Python
 FROM python:3.9-slim
 
+# Install system dependencies for OpenCV
+RUN apt-get update && \
+    apt-get install -y \
+    libgl1-mesa-glx \
+    && rm -rf /var/lib/apt/lists/*
+
 # Set working directory
 WORKDIR /app
 
@@ -8,13 +14,13 @@ WORKDIR /app
 COPY requirements.txt requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Install DVC, Dagshub, MLflow, and any other dependencies
+# Install DVC and other dependencies
 RUN pip install dvc dagshub mlflow
 
-# Copy the entire project into the container
+# Copy the entire project
 COPY . .
 
-# Expose the necessary port for Streamlit (default is 8501)
+# Expose the necessary port (adjust if needed)
 EXPOSE 8501
 
 # Command to run your Streamlit app

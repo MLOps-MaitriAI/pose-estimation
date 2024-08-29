@@ -1,51 +1,60 @@
-name: CI/CD Pipeline
+name: Deploy Best Model
 
 on:
   push:
     branches:
-      - main
-  pull_request:
-    branches:
-      - main
+      - main  # Trigger the workflow on pushes to the main branch
 
 jobs:
-  build:
+  build-and-push:
     runs-on: ubuntu-latest
-    
+
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+    - name: Checkout code
+      uses: actions/checkout@v3
 
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.12'
-        
-      - name: Install dependencies
-        run: |
-          pip install -r requirements.txt
-        
-      - name: Run tracking script
-        run: |
-          python tracking.py
+    - name: Set up Python
+      uses: actions/setup-python@v3
+      with:
+        python-version: 3.12  # Specify your Python version
 
-      - name: Determine best model
-        id: best-model
-        run: |
-          model_folder='./models/best_model/'
-          model_files=$(ls "$model_folder")
-          if [ -z "$model_files" ]; then
-            echo "No model found in the best_model folder"
-            exit 1
-          else
-            latest_model=$(ls -t "$model_folder" | head -n 1)
-            echo "BEST_MODEL=${latest_model}" >> $GITHUB_ENV
-          fi
+    - name: Install dependencies
+      run: |
+        pip install -r requirements.txt  # Ensure requirements.txt includes MLflow and joblib
 
-      - name: Build Docker image
-        run: |
-          docker build -t my-model-image .
+    - name: Pick Best Model and Build Docker Image
+      run: |
+        # Create Dockerfile
+        echo 'FROM python:3.12-slim
+        WORKDIR /app
+        COPY best_model.sav /app/best_model.sav
+        RUN pip install mlflow joblib
+        COPY entrypoint.py /app/entrypoint.py
+        ENTRYPOINT ["python", "/app/entrypoint.py"]' > Dockerfile
 
-      - name: Run Docker container
-        run: |
-          docker run --rm -v $(pwd)/models:/app/models my-model-image
+        # Copy the best model file to the current directory
+        cp models/best_model/best_model.sav .
+
+        # Create a simple entrypoint script to use the model (entrypoint.py)
+        echo 'import joblib
+        import os
+
+        model_path = "best_model.sav"
+        if os.path.exists(model_path):
+            model = joblib.load(model_path)
+            print("Model loaded successfully")
+        else:
+            print("Model not found")' > entrypoint.py
+
+        # Build Docker image
+        docker build -t your-dockerhub-username/pose-estimation-model:latest .
+
+    - name: Log in to Docker Hub
+      uses: docker/login-action@v2
+      with:
+        username: ${{ secrets.DOCKER_HUB_USERNAME }}
+        password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
+
+    - name: Push Docker image to Docker Hub
+      run: |
+        docker push your-dockerhub-username/pose-estimation-model:latest

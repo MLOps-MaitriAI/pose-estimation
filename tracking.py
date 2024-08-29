@@ -16,8 +16,11 @@ import shutil
 # Get the DagsHub token from environment variables
 dagshub_token = os.getenv('DAGSHUB_TOKEN')
 
+# Set the DagsHub token in the environment variable
+os.environ['DAGSHUB_TOKEN'] = dagshub_token
+
 # Initialize Dagshub and MLflow
-dagshub.init(repo_owner='MLOps-MaitriAI', repo_name='pose-estimation', mlflow=True, token=dagshub_token)
+dagshub.init(repo_owner='MLOps-MaitriAI', repo_name='pose-estimation', mlflow=True)
 mlflow.set_tracking_uri("https://dagshub.com/MLOps-MaitriAI/pose-estimation.mlflow")
 
 # Set the experiment name

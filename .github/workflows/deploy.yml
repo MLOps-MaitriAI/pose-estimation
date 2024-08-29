@@ -29,8 +29,24 @@ jobs:
         run: |
           python tracking.py
 
-      - name: Upload model to GitHub
+      - name: Determine best model
+        id: best-model
         run: |
-          git add models/best_model/best_model.sav
-          git commit -m "Add best model to GitHub"
-          git push
+          # Locate the best model
+          model_folder='./models/best_model/'
+          model_files=$(ls "$model_folder")
+          if [ -z "$model_files" ]; then
+            echo "No model found in the best_model folder"
+            exit 1
+          else
+            latest_model=$(ls -t "$model_folder" | head -n 1)
+            echo "BEST_MODEL=${latest_model}" >> $GITHUB_ENV
+          fi
+
+      - name: Build Docker image
+        run: |
+          docker build -t my-model-image .
+
+      - name: Run Docker container
+        run: |
+          docker run --rm -v $(pwd)/models:/app/models my-model-image

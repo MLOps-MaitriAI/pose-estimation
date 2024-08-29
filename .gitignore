@@ -1,7 +1,18 @@
-venv/
-DATASET/
-.DS_Store
-DATASET.zip
-/data
-/models
-/sample images
+# Python
+*.pyc
+*.pyo
+__pycache__
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# Environment variables
+.env
+
+# Docker
+docker-compose.yml
+Dockerfile
+
+# Models
+models/
+

@@ -23,10 +23,10 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           
-      - name: Download the best model
+      - name: Move the best model to the deployment folder
         run: |
           mkdir -p models/best_model
-          wget -O models/best_model/best_model.sav https://your-dataset-url.com/path/to/best_model.sav
+          cp models/best_model.sav models/best_model/best_model.sav
 
       - name: Build Docker image
         run: |

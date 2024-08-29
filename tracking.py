@@ -11,13 +11,25 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.svm import SVC
-import shutil  # Import shutil for file operations
+import shutil
 
-# Initialize MLflow
+# Set the MLflow tracking URI
 mlflow.set_tracking_uri("https://dagshub.com/MLOps-MaitriAI/pose-estimation.mlflow")
 
 # Set the experiment name
 experiment_name = "PE_Model_Comparison"
+
+# Check if the experiment exists, if not, create it
+client = mlflow.tracking.MlflowClient()
+experiment = client.get_experiment_by_name(experiment_name)
+
+if experiment is None:
+    experiment_id = client.create_experiment(experiment_name)
+    print(f"Created new experiment with ID: {experiment_id}")
+else:
+    experiment_id = experiment.experiment_id
+    print(f"Using existing experiment with ID: {experiment_id}")
+
 mlflow.set_experiment(experiment_name)
 
 # File paths for each dataset

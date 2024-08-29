@@ -32,7 +32,6 @@ jobs:
       - name: Determine best model
         id: best-model
         run: |
-          # Locate the best model
           model_folder='./models/best_model/'
           model_files=$(ls "$model_folder")
           if [ -z "$model_files" ]; then

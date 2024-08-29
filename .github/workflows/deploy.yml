@@ -47,7 +47,7 @@ jobs:
             print("Model not found")' > entrypoint.py
 
         # Build Docker image
-        docker build -t your-dockerhub-username/pose-estimation-model:latest .
+        docker build -t mlops1maitriai/pose-estimation-model:latest .
 
     - name: Log in to Docker Hub
       uses: docker/login-action@v2

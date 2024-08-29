@@ -14,12 +14,8 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.svm import SVC
 import shutil
 
-# Set the DagsHub token from the environment
-dagshub_token = os.getenv('DAGSHUB_TOKEN')
-assert dagshub_token, "DAGSHUB_TOKEN environment variable not set!"
-
-# Initialize DagsHub and MLflow with the token
-dagshub.init(repo_owner='MLOps-MaitriAI', repo_name='pose-estimation', mlflow=True, token=dagshub_token)
+# Initialize DagsHub and MLflow
+dagshub.init(repo_owner='MLOps-MaitriAI', repo_name='pose-estimation', mlflow=True)
 mlflow.set_tracking_uri("https://dagshub.com/MLOps-MaitriAI/pose-estimation.mlflow")
 
 # Set the experiment name

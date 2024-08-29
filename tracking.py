@@ -1,7 +1,6 @@
 import mlflow
 import dagshub
 import joblib
-import numpy as np
 import os
 import pandas as pd
 from sklearn.metrics import accuracy_score, confusion_matrix
@@ -12,10 +11,13 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.svm import SVC
-import shutil  # Import shutil for file operations
+import shutil
+
+# Get the DagsHub token from environment variables
+dagshub_token = os.getenv('DAGSHUB_TOKEN')
 
 # Initialize Dagshub and MLflow
-dagshub.init(repo_owner='MLOps-MaitriAI', repo_name='pose-estimation', mlflow=True)
+dagshub.init(repo_owner='MLOps-MaitriAI', repo_name='pose-estimation', mlflow=True, token=dagshub_token)
 mlflow.set_tracking_uri("https://dagshub.com/MLOps-MaitriAI/pose-estimation.mlflow")
 
 # Set the experiment name

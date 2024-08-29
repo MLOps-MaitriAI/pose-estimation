@@ -25,6 +25,8 @@ jobs:
           pip install -r requirements.txt
 
       - name: Run tracking script
+        env:
+          DAGSHUB_TOKEN: ${{ secrets.DAGSHUB_TOKEN }}
         run: |
           python tracking.py
 

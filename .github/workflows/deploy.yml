@@ -57,4 +57,4 @@ jobs:
 
     - name: Push Docker image to Docker Hub
       run: |
-        docker push your-dockerhub-username/pose-estimation-model:latest
+        docker push MAITRI/pose-estimation-model:latest

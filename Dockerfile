@@ -1,20 +1,16 @@
-# Use a lightweight base image
+# Use a base image with Python
 FROM python:3.12-slim
-
-# Set environment variables
-ENV PYTHONDONTWRITEBYTECODE=1
-ENV PYTHONUNBUFFERED=1
 
 # Set the working directory
 WORKDIR /app
 
-# Copy the dependencies file and install dependencies
-COPY requirements.txt /app/
+# Copy the requirements file and install dependencies
+COPY requirements.txt requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy the model and the rest of the application code
-COPY models/best_model /app/models/best_model
-COPY . /app/
+# Copy the best model and the application code into the container
+COPY models/best_model/best_model.sav /app/best_model/
+COPY predict.py /app/
 
-# Set the command to run the model server (example with Flask)
-CMD ["python", "app.py"]
+# Run the application
+ENTRYPOINT ["python", "predict.py"]

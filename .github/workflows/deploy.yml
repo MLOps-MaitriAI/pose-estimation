@@ -1,12 +1,13 @@
-name: Deploy Model
+name: Build and Deploy Model
 
 on:
   push:
     branches:
       - main
+  workflow_dispatch:
 
 jobs:
-  build:
+  build-and-deploy:
     runs-on: ubuntu-latest
 
     steps:
@@ -14,7 +15,7 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v3
         with:
           python-version: 3.12
 
@@ -22,28 +23,31 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-       
-      - name: Run Training Script
-        env:
-          DAGSHUB_TOKEN: ${{ secrets.DAGSHUB_TOKEN }}  # Add the token here
+
+      - name: Run tracking script
         run: |
           python tracking.py
 
-      - name: Ensure the Best Model Directory Exists
-        run: mkdir -p models/best_model
-
-      - name: Copy the Best Model
+      - name: Find the best model
+        id: find-best-model
         run: |
-          if [ -f models/best_model.sav ]; then
-            cp models/best_model.sav models/best_model/best_model.sav
-          else
-            echo "Best model not found!"
-            exit 1
-          fi
+          BEST_MODEL=$(python -c "
+import os
+
+# Locate the best model
+model_folder = './models/best_model/'
+model_files = os.listdir(model_folder)
+if model_files:
+    latest_model = max(model_files, key=lambda f: os.path.getctime(os.path.join(model_folder, f)))
+    print(latest_model)
+else:
+    raise Exception('No model found in the best_model folder')
+")
+          echo "BEST_MODEL=${BEST_MODEL}" >> $GITHUB_ENV
 
       - name: Build Docker image
         run: |
-          docker build -t your-docker-image:latest .
+          docker build -t my-model-image .
 
       - name: Log in to Docker Hub
         uses: docker/login-action@v2
@@ -51,11 +55,7 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Push Docker image
+      - name: Tag and push Docker image
         run: |
-          docker tag your-docker-image:latest your-docker-username/your-docker-image:latest
-          docker push your-docker-username/your-docker-image:latest
-
-      - name: Clean up
-        run: |
-          docker system prune -f
+          docker tag my-model-image:latest ${{ secrets.DOCKER_USERNAME }}/my-model-image:latest
+          docker push ${{ secrets.DOCKER_USERNAME }}/my-model-image:latest

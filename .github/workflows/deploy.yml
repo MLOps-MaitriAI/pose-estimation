@@ -16,25 +16,36 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.12'
+        
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+        
+      - name: Run tracking script
+        run: |
+          python tracking.py
+
       - name: Determine best model
         id: best-model
         run: |
           model_folder='./models/best_model/'
-          if [ -d "$model_folder" ]; then
+          model_files=$(ls "$model_folder")
+          if [ -z "$model_files" ]; then
+            echo "No model found in the best_model folder"
+            exit 1
+          else
             latest_model=$(ls -t "$model_folder" | head -n 1)
             echo "BEST_MODEL=${latest_model}" >> $GITHUB_ENV
-            echo "Best model determined: ${latest_model}"
-          else
-            echo "Model folder not found"
-            exit 1
-        shell: bash
+          fi
 
       - name: Build Docker image
         run: |
           docker build -t my-model-image .
-        shell: bash
 
       - name: Run Docker container
         run: |
-          docker run --rm -e BEST_MODEL=${{ env.BEST_MODEL }} -v $(pwd)/models:/app/models my-model-image
-        shell: bash
+          docker run --rm -v $(pwd)/models:/app/models my-model-image

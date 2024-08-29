@@ -14,8 +14,16 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.svm import SVC
 import shutil  # Import shutil for file operations
 
-# Initialize Dagshub and MLflow
-dagshub.init(repo_owner='MLOps-MaitriAI', repo_name='pose-estimation', mlflow=True)
+# Fetch DagsHub token from environment variable
+dagshub_token = os.getenv('DAGSHUB_TOKEN')
+
+# Initialize Dagshub and MLflow with the token
+dagshub.init(
+    repo_owner='MLOps-MaitriAI', 
+    repo_name='pose-estimation', 
+    token=dagshub_token,  # Pass the token here
+    mlflow=True
+)
 mlflow.set_tracking_uri("https://dagshub.com/MLOps-MaitriAI/pose-estimation.mlflow")
 
 # Set the experiment name

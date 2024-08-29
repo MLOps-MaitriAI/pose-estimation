@@ -3,52 +3,58 @@ name: Build and Push Docker Image
 on:
   push:
     branches:
-      - main
+      - main  # Trigger the workflow on push to the main branch
   pull_request:
     branches:
-      - main
+      - main  # Trigger the workflow on pull requests to the main branch
 
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
+      # Checkout the latest version of the code from the repository
       - name: Checkout code
         uses: actions/checkout@v3
 
+      # Set up Python 3.9 environment
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.9'
 
+      # Install Docker Buildx, a tool for building images with advanced features like multi-platform builds
       - name: Install Docker Buildx
         uses: docker/setup-buildx-action@v2
 
+      # Build the Docker image using the Dockerfile in the root directory
       - name: Build Docker image
         run: |
           docker build -t my-mlops-image:latest .
 
+      # Log in to Docker Hub using credentials stored in GitHub Secrets
       - name: Log in to Docker Hub
         uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
+      # Tag and push the Docker image to Docker Hub
       - name: Push Docker image
         run: |
           docker tag my-mlops-image:latest ${{ secrets.DOCKER_USERNAME }}/my-mlops-image:latest
           docker push ${{ secrets.DOCKER_USERNAME }}/my-mlops-image:latest
 
+      # Set up DagsHub and MLflow for tracking experiments and versioning data
       - name: Set up DagsHub and MLflow
         run: |
           pip install dvc dagshub mlflow
-          dvc pull
-          dagshub init || echo "DagsHub repo already initialized"
-          mlflow set_tracking_uri "https://dagshub.com/MLOps-MaitriAI/pose-estimation.mlflow"
+          dvc pull  # Pull the latest data files tracked by DVC
+          dagshub init || echo "DagsHub repo already initialized"  # Initialize DagsHub or skip if already done
+          mlflow set_tracking_uri "https://dagshub.com/MLOps-MaitriAI/pose-estimation.mlflow"  # Set MLflow tracking URI
 
+      # Placeholder for running tests; replace with actual commands as needed
       - name: Run Tests
         run: |
-          # Replace with your actual test commands
           echo "Running tests..."
-
-
-          
+          # Add your actual test commands here

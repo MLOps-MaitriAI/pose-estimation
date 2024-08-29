@@ -12,13 +12,14 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.svm import SVC
-import shutil  # Import shutil for file operations
+import shutil
 
-# Set the DagsHub token in the environment (ensure this is set in your GitHub Actions environment)
-os.environ['DAGSHUB_TOKEN'] = os.getenv('DAGSHUB_TOKEN')
+# Set the DagsHub token from the environment
+dagshub_token = os.getenv('DAGSHUB_TOKEN')
+assert dagshub_token, "DAGSHUB_TOKEN environment variable not set!"
 
-# Initialize Dagshub and MLflow
-dagshub.init(repo_owner='MLOps-MaitriAI', repo_name='pose-estimation', mlflow=True)
+# Initialize DagsHub and MLflow with the token
+dagshub.init(repo_owner='MLOps-MaitriAI', repo_name='pose-estimation', mlflow=True, token=dagshub_token)
 mlflow.set_tracking_uri("https://dagshub.com/MLOps-MaitriAI/pose-estimation.mlflow")
 
 # Set the experiment name

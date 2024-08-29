@@ -1,17 +1,23 @@
-import joblib
 import os
+import joblib
 import numpy as np
 
+# Determine the best model path
+best_model_name = os.getenv('BEST_MODEL')
+model_path = f'./models/{best_model_name}'
+
+if not os.path.isfile(model_path):
+    raise FileNotFoundError(f'Model file {model_path} does not exist.')
+
 # Load the model
-model_path = './best_model/best_model.sav'
 model = joblib.load(model_path)
 
-def predict(input_data):
-    # Example prediction function
-    return model.predict(input_data)
+# Example prediction (modify as needed)
+def make_predictions():
+    # Dummy data for prediction
+    X = np.random.rand(1, 10)  # Adjust shape as needed
+    predictions = model.predict(X)
+    print("Predictions:", predictions)
 
-# Example usage
 if __name__ == "__main__":
-    # Example input data (replace with actual data)
-    input_data = np.array([[0.1, 0.2, 0.3]])  # Adjust dimensions as needed
-    print(predict(input_data))
+    make_predictions()

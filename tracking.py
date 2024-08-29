@@ -12,6 +12,7 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.svm import SVC
+import shutil  # Import shutil for file operations
 
 # Initialize Dagshub and MLflow
 dagshub.init(repo_owner='MLOps-MaitriAI', repo_name='pose-estimation', mlflow=True)
@@ -44,6 +45,7 @@ models = {
 
 # Store metrics for comparison
 results = {}
+model_paths = {}
 
 for file_path in file_paths:
     # Load the dataset
@@ -64,15 +66,14 @@ for file_path in file_paths:
     # Determine which model to use based on file name
     if '1' in file_path:
         model_name = "KNN"
-        model = models[model_name]
     elif '2' in file_path:
         model_name = "RandomForest"
-        model = models[model_name]
     elif '3' in file_path:
         model_name = "SVC"
-        model = models[model_name]
     else:
         continue
+    
+    model = models[model_name]
     
     # Train the classifier
     model.fit(X_train_scaled, y_train)
@@ -104,6 +105,7 @@ for file_path in file_paths:
         # Calculate accuracy
         accuracy = accuracy_score(y_test, predictions)
         results[model_name] = accuracy
+        model_paths[model_name] = model_path
         
         # Log parameters and metrics
         mlflow.log_param("model_path", model_path)
@@ -141,3 +143,11 @@ for file_path in file_paths:
 # Determine the best model
 best_model = max(results, key=results.get)
 print(f"The best model is: {best_model} with an accuracy of {results[best_model]}")
+
+# Save the best model to a specific directory
+best_model_path = model_paths[best_model]
+best_model_dest_path = './models/best_model'
+os.makedirs(best_model_dest_path, exist_ok=True)
+shutil.copy(best_model_path, os.path.join(best_model_dest_path, 'best_model.sav'))
+
+print(f"The best model has been saved to: {best_model_dest_path}/best_model.sav")

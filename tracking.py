@@ -1,4 +1,5 @@
 import mlflow
+import dagshub
 import joblib
 import numpy as np
 import os
@@ -13,8 +14,9 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.svm import SVC
 import shutil  # Import shutil for file operations
 
-# Initialize MLflow
-mlflow.set_tracking_uri("http://localhost:5000")  # Update this if you're using a different MLflow server
+# Initialize Dagshub and MLflow
+dagshub.init(repo_owner='MLOps-MaitriAI', repo_name='pose-estimation', mlflow=True)
+mlflow.set_tracking_uri("https://dagshub.com/MLOps-MaitriAI/pose-estimation.mlflow")
 
 # Set the experiment name
 experiment_name = "PE_Model_Comparison"

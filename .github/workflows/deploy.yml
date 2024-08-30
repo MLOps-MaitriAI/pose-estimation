@@ -24,25 +24,10 @@ jobs:
 
     - name: Pick Best Model and Build Docker Image
       run: |
-        # Create Dockerfile for multi-stage build
-        echo 'FROM python:3.12-slim AS builder
-        WORKDIR /app
-        COPY requirements.txt .
-        RUN pip install --no-cache-dir -r requirements.txt
-        COPY . .
-
-        FROM python:3.12-slim
-        WORKDIR /app
-        COPY --from=builder /app/best_model.sav /app/best_model.sav
-        COPY --from=builder /app/entrypoint.py /app/entrypoint.py
-        COPY --from=builder /app/requirements.txt /app/requirements.txt
-        RUN pip install --no-cache-dir -r requirements.txt
-        ENTRYPOINT ["python", "/app/entrypoint.py"]' > Dockerfile
-
         # Copy the best model file to the current directory
         cp models/best_model/best_model.sav .
 
-        # Create a simple entrypoint script to use the model (entrypoint.py)
+        # Create the entrypoint script
         echo 'import joblib
         import os
 
@@ -53,7 +38,7 @@ jobs:
         else:
             print("Model not found")' > entrypoint.py
 
-        # Build Docker image using the multi-stage Dockerfile
+        # Build Docker image
         docker build -t mlops1maitriai/pose-estimation-model:latest .
 
     - name: Log in to Docker Hub

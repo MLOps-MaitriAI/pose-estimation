@@ -1,6 +1,0 @@
-[core]
-    no_scm = True
-    remote = myremote
-
-[remote "myremote"]
-    url = https://dagshub.com/MLOps-MaitriAI/pose-estimation.dvc

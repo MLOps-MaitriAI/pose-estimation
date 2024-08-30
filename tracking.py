@@ -7,7 +7,7 @@ import pandas as pd
 from sklearn.metrics import accuracy_score, confusion_matrix
 import seaborn as sns
 import matplotlib.pyplot as plt
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import train_test_split, GridSearchCV
 from sklearn.preprocessing import StandardScaler
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.ensemble import RandomForestClassifier
@@ -29,18 +29,31 @@ file_paths = [
     'data/pose_landmarks_with_categories (3).csv'
 ]
 
-# Model configurations
-models = {
-    "KNN": KNeighborsClassifier(n_neighbors=5),
-    "RandomForest": RandomForestClassifier(
-        n_estimators=100,
-        max_depth=None,
-        min_samples_split=2,
-        min_samples_leaf=1,
-        random_state=42,
-        n_jobs=-1
-    ),
-    "SVC": SVC(kernel='rbf', random_state=42)
+# Model configurations with hyperparameters for GridSearchCV
+model_configs = {
+    "KNN": {
+        "model": KNeighborsClassifier(),
+        "params": {
+            "n_neighbors": [3, 5, 7],
+            "weights": ["uniform", "distance"]
+        }
+    },
+    "RandomForest": {
+        "model": RandomForestClassifier(random_state=42),
+        "params": {
+            "n_estimators": [100, 200],
+            "max_depth": [None, 10, 20],
+            "min_samples_split": [2, 5],
+            "min_samples_leaf": [1, 2]
+        }
+    },
+    "SVC": {
+        "model": SVC(random_state=42),
+        "params": {
+            "kernel": ["rbf", "linear"],
+            "C": [0.1, 1, 10]
+        }
+    }
 }
 
 # Store metrics for comparison
@@ -73,15 +86,23 @@ for file_path in file_paths:
     else:
         continue
     
-    model = models[model_name]
+    config = model_configs[model_name]
     
-    # Train the classifier
-    model.fit(X_train_scaled, y_train)
+    # Use GridSearchCV to find the best hyperparameters
+    grid_search = GridSearchCV(config["model"], config["params"], cv=5, n_jobs=-1)
+    grid_search.fit(X_train_scaled, y_train)
+    
+    # Get the best model from GridSearchCV
+    best_model = grid_search.best_estimator_
+    best_params = grid_search.best_params_
+    
+    # Print the best hyperparameters
+    print(f"Best hyperparameters for {model_name}: {best_params}")
     
     # Save the trained model and scaler
     model_path = f'./models/{model_name.lower()}_model.sav'
     scaler_path = './models/scaler.sav'
-    joblib.dump(model, model_path)
+    joblib.dump(best_model, model_path)
     joblib.dump(scaler, scaler_path)
     
     # Load the pre-trained model and scaler
@@ -108,14 +129,9 @@ for file_path in file_paths:
         model_paths[model_name] = model_path
         
         # Log parameters and metrics
+        mlflow.log_params(best_params)
         mlflow.log_param("model_path", model_path)
         mlflow.log_param("scaler_path", scaler_path)
-        if model_name == "KNN":
-            mlflow.log_param("n_neighbors", model.n_neighbors)
-        elif model_name == "RandomForest":
-            mlflow.log_param("n_estimators", model.n_estimators)
-        elif model_name == "SVC":
-            mlflow.log_param("kernel", model.kernel)
         mlflow.log_metric("accuracy", accuracy)
         
         # Generate and log a confusion matrix
@@ -141,11 +157,11 @@ for file_path in file_paths:
     mlflow.end_run()
 
 # Determine the best model
-best_model = max(results, key=results.get)
-print(f"The best model is: {best_model} with an accuracy of {results[best_model]}")
+best_model_name = max(results, key=results.get)
+print(f"The best model is: {best_model_name} with an accuracy of {results[best_model_name]}")
 
 # Save the best model to a specific directory
-best_model_path = model_paths[best_model]
+best_model_path = model_paths[best_model_name]
 best_model_dest_path = './models/best_model'
 os.makedirs(best_model_dest_path, exist_ok=True)
 shutil.copy(best_model_path, os.path.join(best_model_dest_path, 'best_model.sav'))

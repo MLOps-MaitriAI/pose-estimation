@@ -1,4 +1,4 @@
-name: Deploy Best Model
+name: CI/CD Pipeline for Pose Estimation
 
 on:
   push:
@@ -20,7 +20,7 @@ jobs:
 
     - name: Install dependencies
       run: |
-        pip install -r requirements.txt  # Ensure requirements.txt includes MLflow and joblib
+        pip install -r requirements.txt
 
     - name: Pick Best Model and Build Docker Image
       run: |
@@ -56,5 +56,26 @@ jobs:
         password: ${{ secrets.DOCKER_PASSWORD }}
 
     - name: Push Docker image to Docker Hub
+      run: docker push mlops1maitriai/pose-estimation-model:latest
+
+  deploy-to-kubernetes:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up kubectl
+      uses: azure/setup-kubectl@v3
+      with:
+        version: 'latest'
+
+    - name: Set up Kubeconfig
       run: |
-        docker push mlops1maitriai/pose-estimation-model:latest
+        echo "${{ secrets.KUBECONFIG }}" > $HOME/.kube/config  # KUBECONFIG should be stored in secrets
+
+    - name: Deploy to Kubernetes
+      run: |
+        kubectl apply -f deployment.yaml
+        kubectl apply -f service.yaml

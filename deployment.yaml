@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pose-estimation
+  labels:
+    app: pose-estimation
+spec:
+  replicas: 3  # Number of desired replicas
+  selector:
+    matchLabels:
+      app: pose-estimation
+  template:
+    metadata:
+      labels:
+        app: pose-estimation
+    spec:
+      containers:
+      - name: pose-estimation
+        image: mlops1maitriai/pose-estimation-model:latest  # Docker image from your CI pipeline
+        ports:
+        - containerPort: 8080  # Adjust this port based on your app configuration
+        env:
+        - name: MODEL_PATH
+          value: "/app/best_model.sav"  # Environment variable for your model path

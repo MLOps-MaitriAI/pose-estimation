@@ -24,10 +24,18 @@ jobs:
 
     - name: Pick Best Model and Build Docker Image
       run: |
+        # Create Dockerfile
+        echo 'FROM python:3.12-slim
+        WORKDIR /app
+        COPY best_model.sav /app/best_model.sav
+        RUN pip install mlflow joblib
+        COPY entrypoint.py /app/entrypoint.py
+        ENTRYPOINT ["python", "/app/entrypoint.py"]' > Dockerfile
+
         # Copy the best model file to the current directory
         cp models/best_model/best_model.sav .
 
-        # Create the entrypoint script
+        # Create a simple entrypoint script to use the model (entrypoint.py)
         echo 'import joblib
         import os
 

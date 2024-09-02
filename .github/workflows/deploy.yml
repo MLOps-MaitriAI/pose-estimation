@@ -3,7 +3,7 @@ name: CI/CD Pipeline for Pose Estimation
 on:
   push:
     branches:
-      - main
+      - main  # Trigger the workflow on pushes to the main branch
 
 jobs:
   build-and-push:
@@ -16,7 +16,7 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v3
       with:
-        python-version: 3.12
+        python-version: 3.12  # Specify your Python version
 
     - name: Install dependencies
       run: |
@@ -24,6 +24,7 @@ jobs:
 
     - name: Pick Best Model and Build Docker Image
       run: |
+        # Create Dockerfile
         echo 'FROM python:3.12-slim
         WORKDIR /app
         COPY best_model.sav /app/best_model.sav
@@ -31,8 +32,10 @@ jobs:
         COPY entrypoint.py /app/entrypoint.py
         ENTRYPOINT ["python", "/app/entrypoint.py"]' > Dockerfile
 
+        # Copy the best model file to the current directory
         cp models/best_model/best_model.sav .
 
+        # Create a simple entrypoint script to use the model (entrypoint.py)
         echo 'import joblib
         import os
 
@@ -43,6 +46,7 @@ jobs:
         else:
             print("Model not found")' > entrypoint.py
 
+        # Build Docker image
         docker build -t mlops1maitriai/pose-estimation-model:latest .
 
     - name: Log in to Docker Hub
@@ -72,8 +76,8 @@ jobs:
 
     - name: Set up Kubeconfig
       run: |
-        echo "${{ secrets.KUBECONFIG }}" > $HOME/.kube/config
-        kubectl config view  # Verify Kubeconfig content
+        echo "${{ secrets.KUBECONFIG_CONTENT }}" > $HOME/.kube/config
+        kubectl config set-context --current --namespace=default
 
     - name: Deploy to Kubernetes
       run: |

@@ -76,7 +76,8 @@ jobs:
 
     - name: Set up Kubeconfig
       run: |
-        echo "${{ secrets.KUBECONFIG }}" > $HOME/.kube/config  # Ensure KUBECONFIG is stored in secrets
+        echo "${{ secrets.KUBECONFIG_CONTENT }}" > $HOME/.kube/config
+        kubectl config set-context --current --namespace=default
 
     - name: Deploy to Kubernetes
       run: |

@@ -77,10 +77,10 @@ jobs:
     - name: Set up Kubeconfig
       run: |
         echo "${{ secrets.KUBECONFIG_CONTENT }}" > $HOME/.kube/config
-        kubectl config use-context default  # Replace 'default' with your actual context name if different
+        kubectl config use-context minikube  # Replace 'default' with your actual context name if different
 
     - name: Deploy to Kubernetes
       run: |
-        kubectl config set-context --current --namespace=default
+        kubectl config set-context --current --namespace=minikube
         kubectl apply -f deployment.yaml
         kubectl apply -f service.yaml

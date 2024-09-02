@@ -3,7 +3,7 @@ name: CI/CD Pipeline for Pose Estimation
 on:
   push:
     branches:
-      - main  # Trigger the workflow on pushes to the main branch
+      - main
 
 jobs:
   build-and-push:
@@ -16,7 +16,7 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v3
       with:
-        python-version: 3.12  # Specify your Python version
+        python-version: 3.12
 
     - name: Install dependencies
       run: |
@@ -76,11 +76,14 @@ jobs:
 
     - name: Set up Kubeconfig
       run: |
-        echo "${{ secrets.KUBECONFIG_CONTENT }}" > $HOME/.kube/config
-        kubectl config use-context minikube  # Replace 'default' with your actual context name if different
+        echo "${{ secrets.KUBECONFIG }}" > $HOME/.kube/config
+        kubectl config view  # Verify Kubeconfig content
+
+    - name: Use Context
+      run: |
+        kubectl config use-context minikube  # Ensure 'minikube' is the correct context name
 
     - name: Deploy to Kubernetes
       run: |
-        kubectl config set-context --current --namespace=minikube
         kubectl apply -f deployment.yaml
         kubectl apply -f service.yaml

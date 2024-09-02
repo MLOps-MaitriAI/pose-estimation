@@ -77,7 +77,7 @@ jobs:
     - name: Set up Kubeconfig
       run: |
         echo "${{ secrets.KUBECONFIG_CONTENT }}" > $HOME/.kube/config
-        kubectl config use-context <your-context-name>  # Replace <your-context-name> with the actual context name
+        kubectl config use-context default  # Replace 'default' with your actual context name if different
 
     - name: Deploy to Kubernetes
       run: |

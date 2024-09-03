@@ -3,7 +3,7 @@ name: CI/CD Pipeline for Pose Estimation
 on:
   push:
     branches:
-      - main  # Trigger the workflow on pushes to the main branch
+      - main
 
 jobs:
   build-and-push:
@@ -16,71 +16,34 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v3
       with:
-        python-version: 3.12  # Specify your Python version
+        python-version: 3.12
 
     - name: Install dependencies
       run: |
         pip install -r requirements.txt
 
-    - name: Pick Best Model and Build Docker Image
+    - name: Install Minikube
       run: |
-        # Create Dockerfile
-        echo 'FROM python:3.12-slim
-        WORKDIR /app
-        COPY best_model.sav /app/best_model.sav
-        RUN pip install mlflow joblib
-        COPY entrypoint.py /app/entrypoint.py
-        ENTRYPOINT ["python", "/app/entrypoint.py"]' > Dockerfile
+        curl -Lo minikube https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
+        chmod +x minikube
+        sudo mv minikube /usr/local/bin/
 
-        # Copy the best model file to the current directory
-        cp models/best_model/best_model.sav .
-
-        # Create a simple entrypoint script to use the model (entrypoint.py)
-        echo 'import joblib
-        import os
-
-        model_path = "best_model.sav"
-        if os.path.exists(model_path):
-            model = joblib.load(model_path)
-            print("Model loaded successfully")
-        else:
-            print("Model not found")' > entrypoint.py
-
-        # Build Docker image
-        docker build -t mlops1maitriai/pose-estimation-model:latest .
-
-    - name: Log in to Docker Hub
-      uses: docker/login-action@v2
-      with:
-        username: ${{ secrets.DOCKER_USERNAME }}
-        password: ${{ secrets.DOCKER_PASSWORD }}
-
-    - name: Push Docker image to Docker Hub
-      run: docker push mlops1maitriai/pose-estimation-model:latest
-
-  deploy-to-kubernetes:
-    needs: build-and-push
-    runs-on: ubuntu-latest
-
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
-
-    - name: Set up kubectl
-      uses: azure/setup-kubectl@v3
-      with:
-        version: 'latest'
-
-    - name: Create .kube directory
-      run: mkdir -p $HOME/.kube
-
-    - name: Set up Kubeconfig
+    - name: Start Minikube
       run: |
-        echo "${{ secrets.KUBECONFIG }}" > $HOME/.kube/config
-        kubectl config view  # Verify Kubeconfig content
-        kubectl config set-context --current --namespace=default
+        minikube start --driver=none
+        minikube addons enable ingress
 
-    - name: Deploy to Kubernetes
+    - name: Build Docker Image inside Minikube
+      run: |
+        eval $(minikube -p minikube docker-env)
+        docker build -t pose-estimation-model:latest .
+
+    - name: Deploy to Minikube
       run: |
         kubectl apply -f deployment.yaml
         kubectl apply -f service.yaml
+
+    - name: Verify Deployment
+      run: |
+        kubectl get pods
+        kubectl get services
